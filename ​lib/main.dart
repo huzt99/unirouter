@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'models/tower_device.dart';
+import 'models/tower_location_model.dart';
 import 'services/network_service.dart';
+import 'services/gps_service.dart';
 
 void main() {
   runApp(const UniRouterApp());
@@ -12,7 +14,7 @@ class UniRouterApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'UniRouter Manager',
+      title: 'UniRouter & Towers',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
@@ -35,14 +37,19 @@ class _TowerDashboardScreenState extends State<TowerDashboardScreen> {
   List<TowerDevice> towerDevices = [
     TowerDevice(id: '1', name: 'MikroTik Core Router', ipAddress: '192.168.88.1', type: DeviceType.mikrotik),
     TowerDevice(id: '2', name: 'Ubiquiti Main Link', ipAddress: '192.168.1.20', type: DeviceType.ubiquiti),
-    TowerDevice(id: '3', name: 'Huawei OLT / Fiber', ipAddress: '192.168.100.1', type: DeviceType.olt),
+  ];
+
+  final List<TowerLocationModel> towerLocations = [
+    TowerLocationModel(id: 't1', towerName: 'برج السادة الرئيسي', latitude: 31.3156, longitude: 45.2758, address: 'السماوة - الحيشان'),
+    TowerLocationModel(id: 't2', towerName: 'برج البساتين', latitude: 31.3200, longitude: 45.2800, address: 'السماوة - البساتين الشرقية'),
   ];
 
   bool isLoading = false;
 
-  void refreshDevices() async {
+  void refreshData() async {
     setState(() => isLoading = true);
     var updatedList = await NetworkService.scanTowerDevices(towerDevices);
+    await GpsService.getCurrentTowerCoordinates();
     setState(() {
       towerDevices = updatedList;
       isLoading = false;
@@ -52,60 +59,55 @@ class _TowerDashboardScreenState extends State<TowerDashboardScreen> {
   @override
   void initState() {
     super.initState();
-    refreshDevices();
+    refreshData();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('إدارة أجهزة البرج - UniRouter'),
+        title: const Text('إدارة الأبراج والراوترات - UniRouter'),
         centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: isLoading ? null : refreshDevices,
+            onPressed: isLoading ? null : refreshData,
           ),
         ],
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: towerDevices.length,
-              itemBuilder: (context, index) {
-                final device = towerDevices[index];
-                return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          : ListView(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.all(12.0),
+                  child: Text('📡 أجهزة ومعدات البرج', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blueAccent)),
+                ),
+                ...towerDevices.map((device) => Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   child: ListTile(
-                    leading: Icon(
-                      device.type == DeviceType.mikrotik
-                          ? Icons.router
-                          : device.type == DeviceType.ubiquiti
-                              ? Icons.settings_input_antenna
-                              : Icons.developer_board,
-                      color: Colors.blue,
-                      size: 32,
-                    ),
-                    title: Text(device.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    leading: const Icon(Icons.router, color: Colors.blue),
+                    title: Text(device.name),
                     subtitle: Text('IP: ${device.ipAddress}'),
-                    trailing: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: device.isOnline ? Colors.green.withAlpha(50) : Colors.red.withAlpha(50),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: device.isOnline ? Colors.green : Colors.red),
-                      ),
-                      child: Text(
-                        device.isOnline ? 'متصل' : 'غير متصل',
-                        style: TextStyle(
-                          color: device.isOnline ? Colors.green : Colors.red,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+                    trailing: Text(device.isOnline ? 'متصل' : 'غير متصل', 
+                      style: TextStyle(color: device.isOnline ? Colors.green : Colors.red, fontWeight: FontWeight.bold)),
                   ),
-                );
-              },
+                )),
+                const Divider(height: 30),
+                const Padding(
+                  padding: EdgeInsets.all(12.0),
+                  child: Text('📍 مواقع الأبراج وخرائط GPS', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.greenAccent)),
+                ),
+                ...towerLocations.map((loc) => Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  child: ListTile(
+                    leading: const Icon(Icons.location_on, color: Colors.green),
+                    title: Text(loc.towerName),
+                    subtitle: Text('${loc.address}\nإحداثيات: ${loc.latitude}, ${loc.longitude}'),
+                    isThreeLine: true,
+                  ),
+                )),
+              ],
             ),
     );
   }
