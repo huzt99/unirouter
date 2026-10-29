@@ -25,9 +25,11 @@ jobs:
         channel: 'stable'
 
     - name: Get Dependencies
+      working-directory: .
       run: flutter pub get
 
     - name: Build APK Release
+      working-directory: .
       run: flutter build apk --release
 
     - name: Upload APK Artifact
