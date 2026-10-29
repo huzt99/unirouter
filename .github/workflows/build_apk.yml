@@ -25,15 +25,13 @@ jobs:
         channel: 'stable'
 
     - name: Get Dependencies
-      working-directory: ./unirouter
       run: flutter pub get
 
     - name: Build APK Release
-      working-directory: ./unirouter
       run: flutter build apk --release
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
         name: release-apk
-        path: unirouter/build/app/outputs/flutter-apk/app-release.apk
+        path: build/app/outputs/flutter-apk/app-release.apk
