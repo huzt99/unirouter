@@ -1,0 +1,21 @@
+# Flutter/Dart pattern
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+build/
+
+# Android pattern
+**/android/app/profile
+**/android/app/release
+**/android/app/debug
+
+# Symbol files
+*.a
+*.o
+*.so
+
+# Misc
+.DS_Store
+*.log
