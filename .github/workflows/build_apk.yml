@@ -26,12 +26,14 @@ jobs:
 
     - name: Get Dependencies
       run: flutter pub get
+      working-directory: ./unirouter
 
     - name: Build APK Release
       run: flutter build apk --release
+      working-directory: ./unirouter
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
         name: release-apk
-        path: build/app/outputs/flutter-apk/app-release.apk
+        path: unirouter/build/app/outputs/flutter-apk/app-release.apk
