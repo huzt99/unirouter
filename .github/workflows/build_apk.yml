@@ -24,12 +24,15 @@ jobs:
         flutter-version: '3.19.x'
         channel: 'stable'
 
+    - name: Verify Workspace
+      run: |
+        pwd
+        ls -la
+
     - name: Get Dependencies
-      working-directory: .
       run: flutter pub get
 
     - name: Build APK Release
-      working-directory: .
       run: flutter build apk --release
 
     - name: Upload APK Artifact
