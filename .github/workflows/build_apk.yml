@@ -23,10 +23,14 @@ jobs:
         with:
           channel: stable
 
-      - name: Check files
+      - name: Fix lib folder name
         run: |
-          pwd
-          ls -la
+          ls -lab
+          for d in */; do
+            case "$d" in
+              lib*) if [ "$d" != "lib/" ]; then mv "$d" lib_fixed; mv lib_fixed lib; fi ;;
+            esac
+          done
           ls -la lib
 
       - name: Create Android platform files
