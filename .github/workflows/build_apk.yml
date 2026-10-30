@@ -23,11 +23,16 @@ jobs:
         with:
           channel: stable
 
+      - name: Check files
+        run: |
+          pwd
+          ls -la
+          ls -la lib
+
       - name: Create Android platform files
         run: |
-          mkdir -p /tmp/tmpapp
-          flutter create --platforms=android --project-name=unirouter /tmp/tmpapp
-          cp -r /tmp/tmpapp/android ./android
+          flutter create --platforms=android --project-name=unirouter .
+          git checkout -- lib pubspec.yaml
 
       - name: Get Dependencies
         run: flutter pub get
